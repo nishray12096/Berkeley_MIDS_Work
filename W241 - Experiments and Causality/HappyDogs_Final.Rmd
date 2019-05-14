@@ -1,0 +1,238 @@
+---
+title: "Happy Dogs - Investigating the Effect of Puppy Videos on Biological Stress Measures"
+author: "Shahbakht Hamdani | Beau Kramer | Nishant Velagapudi"
+date: "8/9/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I. Introduction
+Dogs are considered man's best friend: recent studies have even suggested that dogs can positively affect the emotional state of humans. Previous literature suggests that dogs can reduce work related stress (Barker, 2012). Barker's work was limited to the effect of dogs in offices. Further, the sample size involved in the study was extremely small (75 samples).
+ 
+A second set of prior work showed that children with dogs had a lower score on an index for anxiety and anxiety-related disorders than children without dogs (Gadomski, 2015). This study enrolled 643 children ranging from 4 to 10 years of age. While this study alleviates the sample size concerns with the Barker study, there are concerns over the scope of the study (conclusions are restricted to the effect of growing up with dogs on children). Finally, a 2004 study at the University of Missouri-Columbia found that levels of serotonin rise dramatically after just a few minutes of physical interaction with dogs (Johnson and Meadows, 2004). This study was a major motivation for our own.
+
+We are interested in understanding if exposure to even imagery of puppies can have a beneficial impact on the average person. We have designed an experiment to quantify the effects of a video of puppies playing on biological stress signs. We will take a difference-in-differences approach to evaluating this effect: we will take a baseline measurement, show the participant a video (puppies if treatment, white noise if control), and then take a follow-up measurement. Thus, we quantify the treatment effect as the average difference in treatment participants minus the average difference in control participants.
+
+We anticipate several possible covariates ranging from age, height, and exercise characteristics to pet ownership details. We will survey for these covariates to include in post-treatment analysis. 
+
+# II. Script
+
+When approaching a potential participant, we used a normalized script to minimize any effect introduced by variance in approach:
+-----
+### Using google flip-a-coin inline search application, assign participant to treatment or control:
+  Heads: Treatment  https://www.youtube.com/watch?v=PbTjW-0VJN8
+  
+  Tails: Control (white noise video)https://www.youtube.com/watch?v=QhE217-kgzs
+
+### Script when approaching person:
+"Hi there, we are conducting a study of the effects of media on state of mind. Are you willing to watch a 90 second video and allow us to take a smartphone measurement before and after?"
+
+IF NO:
+"Have a nice day!"
+
+IF YES:
+"Please place your finger on the scanner."
+
+1. Collect initial baseline pulse and oxygenation measures
+2. Show video depending on treatment or control
+3. Collect second reading
+
+### After second reading:
+"Thank you for your time! Please answer any of the following questions that you are comfortable with:
+
+* How old are you?
+
+* How tall are you, and roughly how much do you weigh?
+
+* Do you own a pet? Have you ever owned a pet?
+
+* How often do you exercise?"
+
+
+# III. Collection Methodology
+We approached subjects in settings ranging from coffee shops to professional office settings to home or casual settings. Stress measurements were collected using smartphones: apps allowed use of the built-in infrared and red lights to serve as pulse-oximeters. Pulse oximetry allows for the measurement of heart rate (in beats per minute) and blood oxygenation levels (a quantification of what proportion of the participant's hemoglobin is currently coupled to oxygen). Both measurements can be indicative of stress levels. We aimed to survey 40 participants each for a total of 120 participants in the experiment. The basis for this sample size is supported by the power analysis conducted below.
+
+## Power Analysis
+```{r, echo=FALSE, fig.height=3}
+library(pwr)
+p.out <- pwr.t.test(d = 0.5,sig.level = 0.05, type = "two.sample", power = 0.75)
+plot(p.out)
+```
+
+The analysis suggests that to detect a medium sized effect, specified as a Cohen's d of 0.5, we needed 57 participants in each group for a total of 114 subjects. We successfully recruited 116 subjects for the experiment so we are confident we have sufficient sample size to detect an appropriately sized effect.
+
+# IV. Data Description
+
+A detailed exploratory analysis is conducted in Section V succeeding this section. An overview of data gathered is discussed here. A total of 116 observations were collected by the three Collectors, hereby written as CollectorN (Nishant), CollectorB (Beau) and CollectorS (Shahbakht). 
+
+Out of these, 60 were assigned to treatment and the rest were assigned to control group. There were no instances of attrition in the data since all the collection was done on spot. A total of 83 males and 33 females were part of the data, and the source of this bias was subsample from CollectorS, discussed in depth in this section. Age of the subjects ranged from 8 to 82 years, with an average of 34.6 years. The weight and height statistics have an expected distribution bordering on normal. Other parameters include current and former pet ownership. 
+
+The two outcomes of interest are: heart rate (bpm) and oxygenation level (percentage). These are collected pre- and post-treatment or control and difference-in-difference methodology is employed to analyse our results. We selected these measures because they are measurable indicators of stress levels (AHA, 2018).
+
+## A Note on CollectorS' Data:
+
+Each of our team members gathered data on our own and pooled it into a collective file which was used for analysis. This introduces variation in the data depending on the cultural and geographical norms of the place from where the data was collected. 
+
+CollectorS collected the data from Saudi Arabia and that introduced certain unique aspects in those observations, specific to the cultural and societal landscape of that region. 
+
+For example, due to the prevalent norms in the country, CollectorS had no ready access to female participants, and all the 40 observations in his collection are male. 
+
+Secondly, a huge chunk of data collected by CollectorS consisted of local population, in addition to some expats. The local culture does not place a tremendous amount of importance on house pets, and dogs are especially unfavoured on religious grounds. Hence, the sample gathered overwhelmingly consisted of non-pet owners. Only one out of 40 instances included someone who currently owned a pet (not a dog), and 2 instances had previously owned pets. 
+
+Thirdly, there was a noticeable lack of exercise in the data collected by CollectorS. One point of speculation that can answer as to why this is may be due to more adherence to physical fitness in the West than in the East, and that is manifested through all the observations, even the expats who were interviewed.
+
+Thus, one third of the data pool had these anomalies that made it considerably different from the other two thirds. We discuss these anomalies as we encounter them in our results, and exploratory analysis in further sections. We plan to stage one regression to investigate the differential effects of various collectors on the outcome measurements. 
+
+
+```{r}
+
+# setwd("~/Berkeley_MIDS_Homework/W241")
+data = read.table("W241DataGathering-Sheet1.csv", sep=',',header=TRUE)
+```
+
+# V. Exploratory Analysis
+## Histograms of demographic data
+```{r pressure, echo=FALSE}
+#Demographic distributions
+par(mfrow=c(2,2))
+plot(data$Sex, main='Gender Distribution')
+hist(data$Age, main='Age Distribution')
+hist(data$Height, main='Height Distribution')
+hist(data$Weight, main='Weight Distribution')
+```
+
+Examining the demographic data, we make a few observations. First, the distribution of males and females is imbalanced. As mentioned previously, one of our collectors is located in a country where access to women for an experiment is difficult. The imbalance is reflection of this reality. Second, the age distribution is centered around the late twenties and early thirties. This may be a reflection of the age of the collectors and their respective networks. Third, the height data seems within bounds with a mean height of about 68 inches and a standard deviation of 4 inches. Finally, the weight of subjects seems approximately normally distributed with a mean of 162.5 pounds and a standard deviation of 27 pounds. A full data description (summary statistics of each attribute) is included in the Appendix.
+
+\pagebreak
+
+##BMI distribution and exercise vs BMI
+```{r}
+#BMI calculation, distribution
+library(ggplot2)
+data['BMI'] = (data$Weight / (data$Height)^2 ) * 703
+hist(data$BMI)
+BMI_ex_count = aggregate(Subject.No. ~ Freq.of.Exercise, data, FUN = length)
+ggplot(data,aes(x=as.factor(Freq.of.Exercise),y=BMI)) + geom_boxplot() +
+  geom_text(data=BMI_ex_count, aes(x=Freq.of.Exercise+1,y=15,label=Subject.No.)) +
+  ggtitle('BMI versus exercise')
+#(BMI~Freq.of.Exercise,data=data)
+```
+
+The distribution of BMIs suggest that most participants fall into the either the healthy BMI category (18.5 - 25) or the overweight BMI category (25-30). As a metric, BMI can be misleading in characterizing the fitness of a single person: but as a population metric it should provide a reasonable estimate of fitness averages. The boxplot comparing frequency of exercise versus BMI thus serves as a general sense of truthfulness in responses to questions regarding weight and exercise habits. We would expect some correlation between exercise and BMI: the lack of this observed correlation suggests that people are not entirely truthful about their weight and exercise habits. This is a potential flaw with self-reported weight and exercise habits and may reflect in the final regressions.
+
+##Variable distributions by gender and treatment
+```{r}
+#gender boxplots
+par(mfrow=c(2,4))
+boxplot(Age ~ Sex,data=data, main="Age",xaxt="n")
+boxplot(Height ~ Sex,data=data, main="Height",xaxt="n")
+boxplot(Weight ~ Sex,data=data, main="Weight",xaxt="n")
+boxplot(BMI ~ Sex,data=data, main="BMI",xaxt="n")
+boxplot(Freq.of.Exercise ~ Sex,data=data, main="Exercise")
+boxplot(Measure0_bpm ~ Sex,data=data, main = 'Baseline BPM')
+boxplot(measure0_oxy ~ Sex,data=data, main = 'Baseline Oxygenation')
+```
+
+Examining the covariates by gender we make the following observations:
+
+* The range of ages are about the same for males and females. The interquartile band is tighter for males likely due to the sampling issues mentioned above.
+* Males are slightly taller and weigh more than females. This is expected.
+* The distribution of BMIs are similar for males and females. The distribution of males is slightly lower but again this is expected.
+* Females sampled reported exercising more frequently than males. This is the only covariate with an appreciable difference between males and females. This could well be the case. It may also be that the females surveyed over reported their frequency of exercise to the exclusively male collectors. It is also possible, due to the network of the collectors that the males surveyed, are not exercising as frequently than males in general.
+* The baseline BPM and oxygenation are similar for males and females with males slightly elevated for both measurements.
+
+```{r, echo=FALSE}
+library(plyr)
+library(dplyr)
+#Contingency table by gender - observe differences
+ddply(data,~Sex,summarise,CurrentPet=mean(Currently.Own.Pet),HadPet=mean(Have.ever.owned.a.pet.), TreatmentProportion = mean(Treatment))
+#Contingency table by treatment - expect similarities
+ddply(data,~Treatment,summarise,CurrentPet=mean(Currently.Own.Pet),HadPet=mean(Have.ever.owned.a.pet.), TreatmentProportion = mean(Treatment), Age = mean(Age), height = mean(Height), weight = mean(Weight), Exercise = mean(Freq.of.Exercise))
+```
+
+In reviewing the data about pet ownership we make the following observations:
+* Males were much less likely to report currently owning a pet or ever owning a pet. This again may be an artefact of one our collectors conducting the study in a country with low access to females and low pet ownership.
+* Both males and females report a higher rate of having owned a pet in the past. This could be due to the age of subjects. As noted above, the age data is centered around the late twenties/early thirties. Individuals in this age range could be less likely to own pets as they are busy with careers but did own pets during childhood.
+
+The contingency table by treatment suggests that the covariates are relatively well balanced. This is especially important considering the gender imbalance in the data. 
+
+# VI. Results
+
+We prespecified several regressions to avoid conducting a fishing expedition. For each outcome variable (BPM and oxygenation), we conducted four regressions, listed below.
+1. Baseline (treatment variable alone)
+2. Baseline + demographic covariates
+3. Baseline + pet ownership covariates
+4. Omnibus regression with all covariates
+
+This gives us a final count of 8 regressions. Using the Bonferroni correction, we will thus look for a p-value of .05/8 as a cutoff.
+
+Finally, as mentioned previously, we conduct a regression to account for the collector of the data. The regression is specified as the outcome variable against the treatment and indicator variables for the collectors. This regression will help us understand effects at a collector level and give a sense of the generalizability of the treatment effect, if any exists.
+
+```{r, echo=FALSE}
+library(stargazer)
+
+data['BPM_delta'] = data$Measure1_bpm - data$Measure0_bpm
+data['oxy_delta'] = data$measure1_oxy - data$measure0_oxy
+
+#base specification
+BMI_base_spec <- lm(BPM_delta ~ Treatment, data=data)
+oxy_base_spec <- lm(oxy_delta ~ Treatment, data=data)
+
+#demographic specification
+BMI_demo_spec <- lm(BPM_delta ~ Treatment + BMI + Sex + Age + Height + Freq.of.Exercise, data=data)
+oxy_demo_spec <- lm(oxy_delta ~ Treatment + BMI + Sex + Age + Height + Freq.of.Exercise, data=data)
+
+#pet ownership
+BMI_pet_spec <- lm(BPM_delta ~ Treatment + Currently.Own.Pet + Have.ever.owned.a.pet., data=data)
+oxy_pet_spec <- lm(oxy_delta ~ Treatment + Currently.Own.Pet + Have.ever.owned.a.pet., data=data)
+
+#omnibus
+BMI_omni_spec <- lm(BPM_delta ~ Treatment + Currently.Own.Pet + Have.ever.owned.a.pet. + BMI + Sex + Age + Height + Freq.of.Exercise, data=data)
+oxy_omni_spec <- lm(oxy_delta ~ Treatment + Currently.Own.Pet + Have.ever.owned.a.pet. + BMI + Sex + Age + Height + Freq.of.Exercise, data=data)
+
+#collector check
+BMI_coll_spec <- lm(BPM_delta ~ Collector + Treatment, data=data)
+oxy_coll_spec <- lm(oxy_delta ~ Collector + Treatment, data=data)
+
+stargazer(BMI_base_spec,BMI_demo_spec,BMI_pet_spec,BMI_omni_spec, omit.stat=c("f","ser"),type='text')
+stargazer(oxy_base_spec,oxy_demo_spec,oxy_pet_spec,oxy_omni_spec, omit.stat=c("f","ser"),type='text')
+
+stargazer(BMI_coll_spec,oxy_coll_spec,type='text')
+```
+
+
+Table 1 displays the regressions regarding the BPM outcome variable. We note that the treatment seems to have a positive effect on BPM. This is counter to our expectations as we expected treatment to lower BPM as an indication of stress relief. That said, the effect is not statistically significant and changes a great deal as covariates are added. This suggests that the effect of the treatment to be ambiguous if it exists at all. All but one of the covariates, height, exhibit no statistical significance. At the 5% level, height raises BPM by 0.52 bpm or half a beat per minute. While this is a puzzling and interesting result, once the Bonferroni correction is applied, the result no longer exceeds the threshold to reject the null hypothesis of no effect. There also is no prior knowledge to suggest that tall people's cardiovascular system is more responsive than short people. 
+
+Table 2 displays the regressions regarding the oxygenation outcome variable. We note that the treatment has a negative effect on oxygenation. This is again counter to our expectations as we would expect the stress relief from treatment to raise oxygen levels in the blood. The size of the effect persists across specifications. All this noted, the effect is not significant. Again, most of the covariates exhibit no statistical significance. Current pet ownership exhibits a positive effect on oxygenation, raising it by 3.66% with a p-value less than .05, but not less than the adjusted threshold. Former pet ownership exhibits a negative effect on oxygenation, lowering it by 2.94% at the 10% level. This is puzzling because we would expect both to have an effect in the same direction: but since neither result exceeds the adjusted threshold, we will not investigate further.
+
+Table 3 displays the regression regarding the collector. We note that with regard to BPM, CollectorN observed a statistically significant difference from CollectorS and CollectorB at the 10% level. This is independent of the treatment assignment. There are several potential sources of different results at a collector level.
+
+First, there is potential measurement error at the device level. Two collectors used Samsung phones while one used an iPhone. The IR/red light sensors (used to implement pulse oximetry for these measurements) are not the same between the phones. Second, there are geographic and cultural differences in the subject pools. Roughly two-thirds of the subject reside in the United States and roughly one-third reside in Saudi Arabia. There are notable differences in culture between both geographies. Finally, there are potential selection effects in the network of individuals collectors tapped for subjects. All three collectors are graduate students. They have a different network than if the collection were conducted by a different group, say a trio of high school students. The participants that each collector had access to are not necessarily similar either: differences range from geography to regional attitudes to personal networks. Thus, these participants likely represent 3 small subgroups within the overall populace, and thus not representative of all peoples. 
+
+Given these results, we fail to reject the null hypothesis that watching media involving puppies reduces stress levels. We observe no significant treatment effect in either outcome measure when applying the Bonferroni correction to our rejection threshold. It's possible that a treatment effect exists for some specific demographic, but identifying this demographic would require a higher power study (perhaps an order of magnitude more observations). This proposed future work would center around identifying heterogeneous treatment effects (HTEs) involved in this treatment. We would suggest that further study center on one geographical region and look to understand how underlying attitudes or demographics in that region lead to a more localized treatment effect.
+
+\pagebreak
+
+# References
+
+1.       Randolph T. Barker, Janet S. Knisely, Sandra B. Barker, Rachel K. Cobb, Christine M. Schubert,
+(2012) "Preliminary investigation of employee's dog presence on stress and organizational perceptions",
+International Journal of Workplace Health Management, Vol. 5 Issue: 1, pp.15-30,
+https://doi.org/10.1108/17538351211215366
+2.       Gadomski AM, Scribani MB, Krupa N, Jenkins P, Nagykaldi Z, Olson AL.
+Pet Dogs and Children's Health: Opportunities for Chronic Disease Prevention?
+Prev Chronic Dis 2015;12:150204.
+DOI: http://dx.doi.org/10.5888/pcd12.150204.
+3.        "Interacting and Petting Animals Creates a Hormonal Response in Humans That Can Help Fight Depression." News-Medical.net, News-Medical.net, 2 June 2009, www.news-medical.net/news/2004/05/14/1552.aspx. 
+4.        American Heart Association. Stress and Heart Health. April 17th, 2018.
+https://www.heart.org/en/healthy-living/healthy-lifestyle/stress-management/stress-and-heart-health
+
+#Appendix
+###Data Description:
+```{R, echo=FALSE}
+library(Hmisc)
+describe(data)
+```
