@@ -1,5 +1,4 @@
-# Berkeley_MIDS_Work
-Coursework from Nishant Velagapudi's time at Berkeley's MIDS program
+# Classes Taken During my time at MIDS:
 *W201 - Research Design and Applications
 *W203 - Introductory Statistics
 *W207 - Machine Learning
